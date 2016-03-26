@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">Sexual Harassment Reporter</string>
+
+    <!-- API -->
+    <!--<string name="api_base_url">http://192.168.0.239:3000/api/</string>-->
+    <string name="api_base_url">http://162.243.142.84:8080/api/</string>
+    <string name="api_login_url">login</string>
+    <string name="api_signup_url">signup</string>
+    <string name="api_report_harassments_url">report_harassment</string>
+
+    <string name="api_response_status">status</string>
+    <string name="api_response_id">id</string>
+    <string name="api_response_token">token</string>
+    <string name="api_response_err_msg">error_msg</string>
+    <string name="network_error">Network Failure</string>
+
+    <!-- Views -->
+    <string name="current_font_path">fonts/Ubuntu-Bold.ttf</string>
+    <string name="title_activity_login">Login</string>
+    <string name="action_settings">Settings</string>
+    <string name="hint_email">Your Email</string>
+    <string name="hint_password">Your Password</string>
+    <string name="btn_sign_up">Sign Up</string>
+    <string name="btn_login">Login</string>
+    <string name="title_activity_signup">Signup</string>
+    <string name="loading">Loading</string>
+    <string name="required">Required</string>
+    <string name="closeDrawer">Navigation View</string>
+    <string name="openDrawer">Navigation View Closed</string>
+    <string name="api_city_list">city_list</string>
+    <string name="api_harassment_list">harassments_list</string>
+    <string name="api_user_id">user_id</string>
+    <string name="api_token">token</string>
+    <string name="api_response_city_name">city_name</string>
+    <string name="api_response_city_list">city_list</string>
+    <string name="title_activity_report">Report</string>
+    <string name="report">Report</string>
+    <string name="wrong_token">Invalid Request</string>
+    <string name="reported">Reported</string>
+    <string name="location_required">Your location is required</string>
+    <string name="title_activity_harassments_list">Harassments List</string>
+    <string name="safe_zone">Safe Zone</string>
+    <string name="title_activity_harassment">HarassmentActivity</string>
+    <string name="title_activity_near_harassments">NearHarassmentsActivity</string>
+</resources>

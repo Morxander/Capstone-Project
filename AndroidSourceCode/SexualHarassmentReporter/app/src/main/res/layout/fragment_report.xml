@@ -1,0 +1,98 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="5dp"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".fragments.ReportActivityFragment"
+    tools:showIn="@layout/activity_report">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Report Harassment"
+                android:id="@+id/txt_title"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/input_layout_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_below="@id/txt_title"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp">
+                <EditText
+                    android:id="@+id/input_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Title"
+                    android:inputType="textEmailAddress" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/input_layout_body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_below="@id/input_layout_title"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp">
+                <EditText
+                    android:id="@+id/input_body"
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:hint="Body"
+                    android:inputType="textMultiLine"
+                    android:ems="8"
+                    />
+            </android.support.design.widget.TextInputLayout>
+
+            <Spinner
+                android:id="@+id/cities_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="5dp"
+                android:spinnerMode="dialog"
+                android:layout_below="@id/input_layout_body"/>
+
+            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_below="@id/cities_spinner"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="5dp"
+                android:name="com.google.android.gms.maps.MapFragment"
+                android:layout_above="@+id/btn_signup" />
+
+            <Button
+                android:id="@+id/btn_report"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:text="@string/report"
+                android:layout_marginTop="5dp"
+                android:textColor="@android:color/white"
+                android:layout_below="@id/map"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>
