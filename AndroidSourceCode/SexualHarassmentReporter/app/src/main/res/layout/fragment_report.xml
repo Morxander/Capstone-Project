@@ -21,6 +21,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="Report Harassment"
+                android:contentDescription="Report Harassment"
                 android:id="@+id/txt_title"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true" />
@@ -38,6 +39,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Title"
+                    android:contentDescription="Title Textbox"
                     android:inputType="textEmailAddress" />
             </android.support.design.widget.TextInputLayout>
 
@@ -54,6 +56,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
                     android:hint="Body"
+                    android:contentDescription="Body Textbox"
                     android:inputType="textMultiLine"
                     android:ems="8"
                     />
@@ -68,6 +71,7 @@
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="5dp"
                 android:spinnerMode="dialog"
+                android:contentDescription="Cities List"
                 android:layout_below="@id/input_layout_body"/>
 
             <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -78,6 +82,7 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="5dp"
+                android:contentDescription="The Map"
                 android:name="com.google.android.gms.maps.MapFragment"
                 android:layout_above="@+id/btn_signup" />
 
@@ -90,6 +95,7 @@
                 android:layout_marginTop="5dp"
                 android:textColor="@android:color/white"
                 android:layout_below="@id/map"
+                android:contentDescription="Report Button"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
         </RelativeLayout>

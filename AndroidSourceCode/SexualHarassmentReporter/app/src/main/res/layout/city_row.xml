@@ -39,6 +39,7 @@
             android:layout_margin="8dp"
             android:focusableInTouchMode="false"
             android:text="City Name"
+            android:contentDescription="@string/city"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_gravity="center"

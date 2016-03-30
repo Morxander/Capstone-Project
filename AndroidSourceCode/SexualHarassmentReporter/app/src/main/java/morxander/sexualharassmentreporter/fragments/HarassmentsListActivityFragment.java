@@ -1,9 +1,13 @@
 package morxander.sexualharassmentreporter.fragments;
 
+import android.app.LoaderManager;
+import android.content.Loader;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.util.TypedValue;
@@ -25,15 +29,17 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import morxander.sexualharassmentreporter.R;
 import morxander.sexualharassmentreporter.adapters.HarassmentAdapter;
-import morxander.sexualharassmentreporter.db.UserModel;
 import morxander.sexualharassmentreporter.items.Harassment;
+import morxander.sexualharassmentreporter.loaders.HarassmentLoader;
+import morxander.sexualharassmentreporter.providers.MainProvider;
 import morxander.sexualharassmentreporter.utilities.ViewsUtility;
 
-public class HarassmentsListActivityFragment extends Fragment {
+public class HarassmentsListActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Harassment>>{
 
     private ListView listview_harassment;
     public ArrayList<Harassment> harassment_array_list;
@@ -41,16 +47,17 @@ public class HarassmentsListActivityFragment extends Fragment {
     private LinearLayout emptyLayout;
     private ImageView img_timeline_empty;
     private AsyncHttpClient client;
-    private UserModel userModel;
+    private int user_id;
+    private String api_token;
     private TextView emptyText;
-    private int city_id;
+    public static int city_id;
+    private HarassmentAdapter adp;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_harassments_list, container, false);
         initViews(rootView);
-        getHarassments(rootView);
         return rootView;
     }
 
@@ -62,7 +69,14 @@ public class HarassmentsListActivityFragment extends Fragment {
         emptyLayout = (LinearLayout) rootView.findViewById(R.id.empty);
         emptyText = (TextView) rootView.findViewById(R.id.empty_text);
         img_timeline_empty = (ImageView) rootView.findViewById(R.id.list_empty);
-        userModel = UserModel.getCurrentUser();
+        // Get User Data
+        Uri user_uri = Uri.parse(MainProvider.USER_URL);
+        Cursor cursor = getActivity().getContentResolver().query(user_uri, null, null, null, null);
+        cursor.moveToFirst();
+        int id_position = cursor.getColumnIndex("user_id");
+        int token_position = cursor.getColumnIndex("api_token");
+        user_id = cursor.getInt(id_position);
+        api_token = cursor.getString(token_position);
         // Set the font
         ViewsUtility.changeTypeFace(getActivity(), emptyText);
         // Refreshing
@@ -79,11 +93,6 @@ public class HarassmentsListActivityFragment extends Fragment {
         swipe_refresh_layout.setProgressViewOffset(false, 0,
                 (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
         swipe_refresh_layout.setRefreshing(true);
-    }
-
-    // This function will get the harassments list and fill it into the listview
-    private void getHarassments(final View rootView) {
-        swipe_refresh_layout.setRefreshing(true);
         if(getActivity().getIntent().getExtras() != null){
             city_id = getActivity().getIntent().getExtras().getInt("city_id");
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -94,10 +103,17 @@ public class HarassmentsListActivityFragment extends Fragment {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
             city_id = sharedPref.getInt("city_id", 1);
         }
+        getLoaderManager().initLoader(1, null, HarassmentsListActivityFragment.this).forceLoad();
+    }
+
+    // This function will get the harassments list and fill it into the listview
+    private void getHarassments(final View rootView) {
+        swipe_refresh_layout.setRefreshing(true);
+
         client = new AsyncHttpClient();
         String url = getString(R.string.api_base_url) + getString(R.string.api_harassment_list);
-        url = url + "?" + getString(R.string.api_user_id) + "=" + userModel.getUser_id();
-        url = url + "&" + getString(R.string.api_token) + "=" + userModel.getApi_token();
+        url = url + "?" + getString(R.string.api_user_id) + "=" + user_id;
+        url = url + "&" + getString(R.string.api_token) + "=" + api_token;
         url = url + "&" + "city_id" + "=" + city_id;
         client.get(getActivity(), url, new AsyncHttpResponseHandler() {
             @Override
@@ -127,7 +143,7 @@ public class HarassmentsListActivityFragment extends Fragment {
                             img_timeline_empty.setTag(R.drawable.safe_zone);
                             emptyText.setText(R.string.safe_zone);
                         }
-                        HarassmentAdapter adp = new HarassmentAdapter(rootView.getContext(), HarassmentsListActivityFragment.this, harassment_array_list);
+                        adp = new HarassmentAdapter(rootView.getContext(), HarassmentsListActivityFragment.this, harassment_array_list);
                         listview_harassment.setAdapter(adp);
                         adp.notifyDataSetChanged();
                     } else {
@@ -152,4 +168,28 @@ public class HarassmentsListActivityFragment extends Fragment {
         });
     }
 
+    @Override
+    public Loader<List<Harassment>> onCreateLoader(int i, Bundle bundle) {
+        return new HarassmentLoader(getActivity().getBaseContext());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<Harassment>> loader, List<Harassment> harassmentList) {
+        Log.v("Loader", "List Size " + harassmentList.size());
+        if(harassmentList.size() > 0){
+            swipe_refresh_layout.setRefreshing(false);
+            harassment_array_list.addAll(harassmentList);
+            adp = new HarassmentAdapter(getActivity(), HarassmentsListActivityFragment.this, harassment_array_list);
+            listview_harassment.setAdapter(adp);
+            adp.notifyDataSetChanged();
+        }else{
+            swipe_refresh_layout.setRefreshing(false);
+            emptyLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Harassment>> loader) {
+
+    }
 }

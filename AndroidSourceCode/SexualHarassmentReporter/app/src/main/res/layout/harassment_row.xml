@@ -35,6 +35,7 @@
         android:focusableInTouchMode="false"
         android:gravity="center_vertical"
         android:text="Harassment Title"
+        android:contentDescription="@string/harassment_title_desc"
         android:textColor="@color/colorPrimaryText"
         android:textSize="18sp"
         android:textStyle="bold" />

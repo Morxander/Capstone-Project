@@ -1,12 +1,16 @@
 package morxander.sexualharassmentreporter.fragments;
 
 import android.app.Fragment;
+import android.app.LoaderManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -40,27 +44,31 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import morxander.sexualharassmentreporter.R;
 import morxander.sexualharassmentreporter.adapters.HarassmentAdapter;
-import morxander.sexualharassmentreporter.db.UserModel;
 import morxander.sexualharassmentreporter.items.Harassment;
+import morxander.sexualharassmentreporter.loaders.HarassmentLoader;
+import morxander.sexualharassmentreporter.loaders.NearHarassmentsLoader;
+import morxander.sexualharassmentreporter.providers.MainProvider;
 import morxander.sexualharassmentreporter.utilities.ViewsUtility;
 
 
-public class NearHarassmentsActivityFragment extends Fragment implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback {
+public class NearHarassmentsActivityFragment extends Fragment implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, LoaderManager.LoaderCallbacks<List<Harassment>> {
 
     private TextView txt_title,txt_status;
     private GoogleMap m_map;
     private MapFragment map;
-    private double latitude, longitude;
+    public static double latitude, longitude;
     private GoogleApiClient google_api_client;
     private LocationRequest location_request;
     private boolean location_enabled = false;
     private boolean fetched_data=false;
     private AsyncHttpClient client;
-    private UserModel userModel;
+    private int user_id;
+    private String api_token;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,7 +83,14 @@ public class NearHarassmentsActivityFragment extends Fragment implements Locatio
         txt_status = (TextView)rootView.findViewById(R.id.txt_status);
         ViewsUtility.changeTypeFace(getActivity(),txt_title);
         ViewsUtility.changeTypeFace(getActivity(),txt_status);
-        userModel = UserModel.getCurrentUser();
+        // Get User Data
+        Uri user_uri = Uri.parse(MainProvider.USER_URL);
+        Cursor cursor = getActivity().getContentResolver().query(user_uri, null, null, null, null);
+        cursor.moveToFirst();
+        int id_position = cursor.getColumnIndex("user_id");
+        int token_position = cursor.getColumnIndex("api_token");
+        user_id = cursor.getInt(id_position);
+        api_token = cursor.getString(token_position);
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             location_enabled = true;
@@ -118,7 +133,7 @@ public class NearHarassmentsActivityFragment extends Fragment implements Locatio
         latitude = location.getLatitude();
         longitude = location.getLongitude();
         if(!fetched_data){
-            getHarassments();
+            getLoaderManager().initLoader(1, null, NearHarassmentsActivityFragment.this).forceLoad();
         }
     }
 
@@ -168,59 +183,27 @@ public class NearHarassmentsActivityFragment extends Fragment implements Locatio
 
     }
 
-    // This function will get the harassments list and fill it into the listview
-    private void getHarassments() {
-        client = new AsyncHttpClient();
-        txt_status.setText("Getting data ....");
-        String url = getString(R.string.api_base_url) + "nearby_harassments";
-        url = url + "?" + getString(R.string.api_user_id) + "=" + userModel.getUser_id();
-        url = url + "&" + getString(R.string.api_token) + "=" + userModel.getApi_token();
-        url = url + "&" + "lat" + "=" + latitude;
-        url = url + "&" + "lon" + "=" + longitude;
-        client.get(getActivity(), url, new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                try {
-                    txt_status.setText("Showing the data");
-                    String str = new String(responseBody, "UTF-8");
-                    JSONObject json = new JSONObject(str);
-                    if (json.getBoolean(getString(R.string.api_response_status))) {
-                        JSONArray requests_list = json.getJSONArray("harassments_list");
-                        if (requests_list.length() != 0) {
-                            for (int i = 0; i < requests_list.length(); i++) {
-                                JSONObject harassmentObject = requests_list.getJSONObject(i);
-                                Harassment harassment = new Harassment();
-                                harassment.setId(harassmentObject.getInt(getString(R.string.api_response_id)));
-                                harassment.setTitle(harassmentObject.getString("title"));
-                                harassment.setBody(harassmentObject.getString("body"));
-                                harassment.setLat(harassmentObject.getDouble("lat"));
-                                harassment.setLon(harassmentObject.getDouble("lon"));
-                                LatLng latLng = new LatLng(harassment.getLat(),harassment.getLon());
-                                m_map.addMarker(new MarkerOptions().position(latLng));
-                                if(i == requests_list.length() - 1){
-                                    m_map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                                    m_map.animateCamera(CameraUpdateFactory.zoomTo(15));
-                                }
-                            }
-                            fetched_data = true;
-                        }
-                    } else {
-                        // Wrong token
-                        Toast.makeText(getActivity(), R.string.wrong_token, Toast.LENGTH_LONG).show();
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_LONG).show();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_LONG).show();
-                }
-            }
+    @Override
+    public Loader<List<Harassment>> onCreateLoader(int i, Bundle bundle) {
+        return new NearHarassmentsLoader(getActivity().getBaseContext());
+    }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Log.v("Error",String.valueOf(statusCode));
+    @Override
+    public void onLoadFinished(Loader<List<Harassment>> loader, List<Harassment> harassmentList) {
+        txt_status.setText("Data has been fetched");
+        for(Harassment harassment : harassmentList){
+            LatLng latLng = new LatLng(harassment.getLat(),harassment.getLon());
+            m_map.addMarker(new MarkerOptions().position(latLng));
+            if(harassmentList.indexOf(harassment) == 0){
+                m_map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                m_map.animateCamera(CameraUpdateFactory.zoomTo(15));
             }
-        });
+        }
+        fetched_data = true;
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Harassment>> loader) {
+
     }
 }

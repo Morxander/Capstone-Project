@@ -26,6 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_email"
+                android:contentDescription="Email Textbox"
                 android:inputType="textEmailAddress" />
         </android.support.design.widget.TextInputLayout>
 
@@ -40,6 +41,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_password"
+                android:contentDescription="Password Textbox"
                 android:inputType="textPassword" />
         </android.support.design.widget.TextInputLayout>
 
@@ -51,6 +53,7 @@
             android:layout_marginTop="40dp"
             android:background="@color/colorPrimary"
             android:text="@string/btn_login"
+            android:contentDescription="Login Button"
             android:textColor="@android:color/white" />
 
         <Button
@@ -61,6 +64,7 @@
             android:layout_marginTop="10dp"
             android:background="@color/colorPrimary"
             android:text="@string/btn_sign_up"
+            android:contentDescription="Sign Up Button"
             android:textColor="@android:color/white" />
 
     </LinearLayout>

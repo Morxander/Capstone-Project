@@ -39,7 +39,7 @@ public class HarassmentAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return harassmentsListActivityFragment.harassment_array_list.size();
+        return harassmentArrayList.size();
     }
 
     @Override
@@ -73,6 +73,7 @@ public class HarassmentAdapter extends BaseAdapter {
         // Set the results into TextViews
         holder.firstLetter.setText(harassmentArrayList.get(position).getTitle().toUpperCase().substring(0,1));
         holder.harassmetTitle.setText(harassmentArrayList.get(position).getTitle());
+        holder.harassmetTitle.setContentDescription(mContext.getString(R.string.harassment_title_desc) + harassmentArrayList.get(position).getTitle());
         // Set the type face
         ViewsUtility.changeTypeFace(mContext,holder.firstLetter);
         ViewsUtility.changeTypeFace(mContext,holder.harassmetTitle);
