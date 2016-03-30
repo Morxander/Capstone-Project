@@ -5,15 +5,15 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.activeandroid.query.Select;
-
 import morxander.sexualharassmentreporter.R;
-import morxander.sexualharassmentreporter.db.UserModel;
+import morxander.sexualharassmentreporter.providers.MainProvider;
 import morxander.sexualharassmentreporter.utilities.ViewsUtility;
 
 public class splashActivity extends AppCompatActivity {
@@ -41,8 +41,9 @@ public class splashActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                UserModel db = new Select().from(UserModel.class).executeSingle();
-                if(db == null){
+                Uri user_uri = Uri.parse(MainProvider.USER_URL);
+                Cursor cursor = getContentResolver().query(user_uri, null, null, null, null);
+                if(cursor.getCount() == 0){
                     finish();
                     startActivity(new Intent(splashActivity.this,LoginActivity.class));
                 }else{

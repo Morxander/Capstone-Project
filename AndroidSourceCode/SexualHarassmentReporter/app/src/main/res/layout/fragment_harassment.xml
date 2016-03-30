@@ -20,6 +20,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:text="Report Title"
+                android:contentDescription="@string/report_title_is"
                 android:id="@+id/txt_title"
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
@@ -30,6 +31,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="8:42 PM"
+                android:contentDescription="@string/report_time_is"
                 android:id="@+id/txt_time"
                 android:textColor="@color/colorSecondaryText"
                 android:layout_below="@id/txt_title"
@@ -42,6 +44,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s"
                 android:id="@+id/txt_body"
+                android:contentDescription="@string/report_body_is"
                 android:textColor="@color/colorPrimaryText"
                 android:layout_below="@id/txt_time"
                 android:layout_marginBottom="5dp"
@@ -55,6 +58,7 @@
                 android:layout_height="match_parent"
                 android:layout_below="@id/txt_body"
                 android:layout_margin="5dp"
+                android:contentDescription="The Map"
                 android:name="com.google.android.gms.maps.MapFragment" />
 
         </RelativeLayout>

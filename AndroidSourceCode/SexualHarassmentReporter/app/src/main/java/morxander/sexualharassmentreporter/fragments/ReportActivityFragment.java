@@ -1,17 +1,22 @@
 package morxander.sexualharassmentreporter.fragments;
 
 import android.app.Fragment;
+import android.app.LoaderManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,14 +49,17 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import morxander.sexualharassmentreporter.R;
-import morxander.sexualharassmentreporter.db.UserModel;
+import morxander.sexualharassmentreporter.adapters.CityAdapter;
 import morxander.sexualharassmentreporter.items.City;
+import morxander.sexualharassmentreporter.loaders.CityLoader;
+import morxander.sexualharassmentreporter.providers.MainProvider;
 import morxander.sexualharassmentreporter.utilities.ViewsUtility;
 
-public class ReportActivityFragment extends Fragment implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback {
+public class ReportActivityFragment extends Fragment implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback, LoaderManager.LoaderCallbacks<List<City>>  {
 
 
     private GoogleMap m_map;
@@ -65,7 +73,8 @@ public class ReportActivityFragment extends Fragment implements LocationListener
     private ArrayList<Integer> cityIdsArrayList;
     private TextInputLayout layout_title, layout_body;
     private Button bt_report;
-    private UserModel userModel;
+    private int user_id;
+    private String api_token;
     private ProgressDialog loading_dialog;
     private AsyncHttpClient client;
     private RequestParams params;
@@ -118,8 +127,15 @@ public class ReportActivityFragment extends Fragment implements LocationListener
         ViewsUtility.changeTypeFace(getActivity(), txt_view_title);
         ViewsUtility.changeTypeFace(getActivity(), layout_title);
         ViewsUtility.changeTypeFace(getActivity(), layout_body);
-        userModel = UserModel.getCurrentUser();
-        getCities(rootView);
+        // Get User Data
+        Uri user_uri = Uri.parse(MainProvider.USER_URL);
+        Cursor cursor = getActivity().getContentResolver().query(user_uri, null, null, null, null);
+        cursor.moveToFirst();
+        int id_position = cursor.getColumnIndex("user_id");
+        int token_position = cursor.getColumnIndex("api_token");
+        user_id = cursor.getInt(id_position);
+        api_token = cursor.getString(token_position);
+        getLoaderManager().initLoader(1, null, ReportActivityFragment.this).forceLoad();
         google_api_client = new GoogleApiClient.Builder(getActivity())
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
@@ -152,8 +168,8 @@ public class ReportActivityFragment extends Fragment implements LocationListener
                         client = new AsyncHttpClient();
                         params = new RequestParams();
                         String url = getString(R.string.api_base_url) + getString(R.string.api_report_harassments_url);
-                        params.add(getString(R.string.api_token), userModel.getApi_token());
-                        params.add(getString(R.string.api_user_id), String.valueOf(userModel.getUser_id()));
+                        params.add(getString(R.string.api_token), api_token);
+                        params.add(getString(R.string.api_user_id), String.valueOf(user_id));
                         params.add("lat", String.valueOf(latitude));
                         params.add("lon", String.valueOf(longitude));
                         params.add("title", txt_title.getText().toString());
@@ -201,8 +217,8 @@ public class ReportActivityFragment extends Fragment implements LocationListener
         loading_dialog.show();
         client = new AsyncHttpClient();
         String url = getString(R.string.api_base_url) + getString(R.string.api_city_list);
-        url = url + "?" + getString(R.string.api_user_id) + "=" + userModel.getUser_id();
-        url = url + "&" + getString(R.string.api_token) + "=" + userModel.getApi_token();
+        url = url + "?" + getString(R.string.api_user_id) + "=" + user_id;
+        url = url + "&" + getString(R.string.api_token) + "=" + api_token;
         client.get(getActivity(), url, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -313,5 +329,38 @@ public class ReportActivityFragment extends Fragment implements LocationListener
         LatLng cairo_latlo = new LatLng(30.0500, 31.2333);
         CameraPosition position = CameraPosition.builder().target(cairo_latlo).zoom(13).build();
         m_map.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+    }
+
+    @Override
+    public Loader<List<City>> onCreateLoader(int i, Bundle bundle) {
+        Log.v("Loader", "Loader Created");
+        loading_dialog.show();
+        return new CityLoader(getActivity().getBaseContext());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<City>> loader, List<City> cities) {
+        Log.v("Loader", "Loader Finished");
+        Log.v("Loader", "Loader cities " + cities.size());
+        Log.v("Loader", "Loader City 0 " + cities.get(0).getName());
+        if(cities.size() > 0){
+            loading_dialog.dismiss();
+            for(City city : cities){
+                cityArrayList.add(city.getName());
+                cityIdsArrayList.add(city.getId());
+            }
+            String[] citiesArrayList = cityArrayList.toArray(new String[cityArrayList.size()]);
+            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, citiesArrayList);
+            city_list.setAdapter(spinnerArrayAdapter);
+            spinnerArrayAdapter.notifyDataSetChanged();
+            Log.v("Loader", "Loader spinnerArrayAdapter " + spinnerArrayAdapter);
+        }else{
+            loading_dialog.dismiss();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<City>> loader) {
+
     }
 }

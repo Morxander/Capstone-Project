@@ -1,7 +1,9 @@
 package morxander.sexualharassmentreporter.fragments;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -26,7 +28,7 @@ import cz.msebera.android.httpclient.Header;
 import morxander.sexualharassmentreporter.R;
 import morxander.sexualharassmentreporter.activities.MainActivity;
 import morxander.sexualharassmentreporter.activities.SignupActivity;
-import morxander.sexualharassmentreporter.db.UserModel;
+import morxander.sexualharassmentreporter.providers.MainProvider;
 import morxander.sexualharassmentreporter.utilities.ViewsUtility;
 
 /**
@@ -125,11 +127,16 @@ public class LoginActivityFragment extends Fragment {
                                 String str = new String(responseBody, "UTF-8");
                                 JSONObject json = new JSONObject(str);
                                 if (json.getBoolean(getString(R.string.api_response_status))) {
-                                    UserModel db = new UserModel();
-                                    db.setUser_id(json.getInt(getString(R.string.api_response_id)));
-                                    db.setApi_token(json.getString(getString(R.string.api_response_token)));
-                                    db.setEmail(input_email.getText().toString());
-                                    db.save();
+                                    ContentValues statistics_values = new ContentValues();
+                                    statistics_values.put(MainProvider.REPORTS_COUNT, json.getString(getString(R.string.reports_count)));
+                                    Uri statistics_uri = getActivity().getContentResolver().insert(
+                                            MainProvider.STATISTICS_CONTENT_URI, statistics_values);
+                                    ContentValues user_values = new ContentValues();
+                                    user_values.put(MainProvider.EMAIL, input_email.getText().toString());
+                                    user_values.put(MainProvider.USER_API_ID, json.getString(getString(R.string.api_response_id)));
+                                    user_values.put(MainProvider.API_TOKEN, json.getString(getString(R.string.api_response_token)));
+                                    Uri user_uri = getActivity().getContentResolver().insert(
+                                            MainProvider.USER_CONTENT_URI, user_values);
                                     Intent intent = new Intent(getContext(),MainActivity.class);
                                     startActivity(intent);
                                     getActivity().finish();

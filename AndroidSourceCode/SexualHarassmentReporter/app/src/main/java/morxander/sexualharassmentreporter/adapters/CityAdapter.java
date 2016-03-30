@@ -2,6 +2,7 @@ package morxander.sexualharassmentreporter.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +40,7 @@ public class CityAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return cityListFragment.cityArrayList.size();
+        return cityArrayList.size();
     }
 
     @Override
@@ -73,6 +74,7 @@ public class CityAdapter extends BaseAdapter {
         // Set the results into TextViews
         holder.firstLetter.setText(cityArrayList.get(position).getName().toUpperCase().substring(0,1));
         holder.cityName.setText(cityArrayList.get(position).getName());
+        holder.cityName.setContentDescription(mContext.getString(R.string.city) + cityArrayList.get(position).getName());
         // Set the type face
         ViewsUtility.changeTypeFace(mContext,holder.firstLetter);
         ViewsUtility.changeTypeFace(mContext,holder.cityName);

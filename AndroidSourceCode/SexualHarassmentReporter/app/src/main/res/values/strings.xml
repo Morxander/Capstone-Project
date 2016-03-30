@@ -42,4 +42,12 @@
     <string name="safe_zone">Safe Zone</string>
     <string name="title_activity_harassment">HarassmentActivity</string>
     <string name="title_activity_near_harassments">NearHarassmentsActivity</string>
+    <string name="harassment_title_desc">Harassment Title Is : </string>
+    <string name="report_title_is">Report Title Is :</string>
+    <string name="report_time_is">Report Time Is :</string>
+    <string name="report_body_is">Report Body Is :</string>
+    <string name="city">City :</string>
+    <string name="reports_count">reports_count</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>

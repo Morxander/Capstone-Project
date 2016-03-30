@@ -13,6 +13,7 @@
         <ListView
             android:id="@+id/listview_city"
             android:layout_width="match_parent"
+            android:contentDescription="Cities List"
             android:layout_height="match_parent" />
 
 

@@ -47,8 +47,11 @@ public class HarassmentActivityFragment extends Fragment implements OnMapReadyCa
         lat = getActivity().getIntent().getExtras().getDouble("lat");
         lon = getActivity().getIntent().getExtras().getDouble("lon");
         txt_title.setText(getActivity().getIntent().getExtras().getString("title"));
+        txt_title.setContentDescription(getString(R.string.report_title_is) + getActivity().getIntent().getExtras().getString("title"));
         txt_time.setText(getActivity().getIntent().getExtras().getString("time"));
+        txt_title.setContentDescription(getString(R.string.report_time_is) + getActivity().getIntent().getExtras().getString("time"));
         txt_body.setText(getActivity().getIntent().getExtras().getString("body"));
+        txt_title.setContentDescription(getString(R.string.report_body_is) + getActivity().getIntent().getExtras().getString("body"));
         map = (MapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         map.getMapAsync(this);
     }
